@@ -1,0 +1,15 @@
+# Virtual environment
+venv/
+
+# Python temporary files
+__pycache__/
+*.pyc
+
+# Secret environment variables
+.env
+
+# Flask local files
+instance/
+
+# VS Code local settings
+.vscode/
