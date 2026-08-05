@@ -3,6 +3,13 @@ from sqlalchemy.exc import IntegrityError
 
 from ..extensions import db
 from ..models import Major, Student
+from pydantic import ValidationError
+
+from ..dtos import (
+    CreateStudentDTO,
+    UpdateStudentDTO,
+    StudentResponseDTO
+)
 
 
 student_controller = Blueprint(
@@ -55,25 +62,22 @@ def get_student(student_id):
 def create_student():
     data = request.get_json(silent=True) or {}
 
-    required_fields = [
-        "name",
-        "phone_number",
-        "email_address",
-        "major_id"
-    ]
+    try:
+        student_dto = CreateStudentDTO.model_validate(data)
 
-    missing_fields = [
-        field for field in required_fields
-        if data.get(field) in (None, "")
-    ]
-
-    if missing_fields:
+    except ValidationError as error:
         return jsonify({
-            "error": "Missing required fields",
-            "fields": missing_fields
+            "error": "Invalid student data",
+            "details": error.errors(
+                include_url=False,
+                include_input=False
+            )
         }), 400
 
-    major = db.session.get(Major, data["major_id"])
+    major = db.session.get(
+        Major,
+        student_dto.major_id
+    )
 
     if major is None:
         return jsonify({
@@ -81,18 +85,19 @@ def create_student():
         }), 404
 
     student = Student(
-        name=data["name"],
-        phone_number=data["phone_number"],
-        email_address=data["email_address"],
-        major_id=data["major_id"]
+        **student_dto.model_dump()
     )
 
     db.session.add(student)
     db.session.commit()
 
+    response_dto = StudentResponseDTO.model_validate(
+        student
+    )
+
     return jsonify({
         "message": "Student created successfully",
-        "student": student_to_dict(student)
+        "student": response_dto.model_dump()
     }), 201
 
 
