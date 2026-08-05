@@ -36,24 +36,33 @@ def get_students():
         db.select(Student).order_by(Student.id)
     ).scalars().all()
 
-    return jsonify([
-        student_to_dict(student)
+    students_response = [
+        StudentResponseDTO.model_validate(student).model_dump()
         for student in students
-    ]), 200
+    ]
+
+    return jsonify(students_response), 200
 
 
 # GET /api/students/1
 @student_controller.get("/<int:student_id>")
 def get_student(student_id):
-    student = db.session.get(Student, student_id)
+    student = db.session.get(
+        Student,
+        student_id
+    )
 
     if student is None:
         return jsonify({
             "error": "Student not found"
         }), 404
 
+    response_dto = StudentResponseDTO.model_validate(
+        student
+    )
+
     return jsonify(
-        student_to_dict(student)
+        response_dto.model_dump()
     ), 200
 
 
@@ -104,7 +113,10 @@ def create_student():
 # PATCH /api/students/1
 @student_controller.patch("/<int:student_id>")
 def update_student(student_id):
-    student = db.session.get(Student, student_id)
+    student = db.session.get(
+        Student,
+        student_id
+    )
 
     if student is None:
         return jsonify({
@@ -113,37 +125,54 @@ def update_student(student_id):
 
     data = request.get_json(silent=True) or {}
 
-    if not data:
+    try:
+        update_dto = UpdateStudentDTO.model_validate(
+            data
+        )
+
+    except ValidationError as error:
         return jsonify({
-            "error": "No data provided"
+            "error": "Invalid student data",
+            "details": error.errors(
+                include_url=False,
+                include_input=False
+            )
         }), 400
 
-    if "name" in data:
-        student.name = data["name"]
+    updates = update_dto.model_dump(
+        exclude_unset=True,
+        exclude_none=True
+    )
 
-    if "phone_number" in data:
-        student.phone_number = data["phone_number"]
+    if not updates:
+        return jsonify({
+            "error": "No valid fields provided"
+        }), 400
 
-    if "email_address" in data:
-        student.email_address = data["email_address"]
-
-    if "major_id" in data:
-        major = db.session.get(Major, data["major_id"])
+    if "major_id" in updates:
+        major = db.session.get(
+            Major,
+            updates["major_id"]
+        )
 
         if major is None:
             return jsonify({
                 "error": "Major not found"
             }), 404
 
-        student.major_id = data["major_id"]
+    for field, value in updates.items():
+        setattr(student, field, value)
 
     db.session.commit()
 
+    response_dto = StudentResponseDTO.model_validate(
+        student
+    )
+
     return jsonify({
         "message": "Student updated successfully",
-        "student": student_to_dict(student)
+        "student": response_dto.model_dump()
     }), 200
-
 
 # DELETE /api/students/1
 @student_controller.delete("/<int:student_id>")
