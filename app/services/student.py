@@ -1,5 +1,3 @@
-from sqlalchemy.exc import IntegrityError
-
 from ..extensions import db
 from ..models import Student
 from ..repositories.major import MajorRepository
@@ -17,9 +15,6 @@ class MajorNotFoundError(Exception):
 class NoFieldsToUpdateError(Exception):
     pass
 
-
-class StudentHasRegistrationsError(Exception):
-    pass
 
 
 class StudentService:
@@ -108,11 +103,6 @@ class StudentService:
         try:
             StudentRepository.delete(student)
             db.session.commit()
-
-        except IntegrityError as error:
-            db.session.rollback()
-
-            raise StudentHasRegistrationsError() from error
 
         except Exception:
             db.session.rollback()

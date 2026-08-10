@@ -10,8 +10,7 @@ from ..services import (
     StudentService,
     StudentNotFoundError,
     MajorNotFoundError,
-    NoFieldsToUpdateError,
-    StudentHasRegistrationsError
+    NoFieldsToUpdateError
 )
 
 
@@ -158,14 +157,6 @@ def delete_student(student_id):
         return jsonify({
             "error": "Student not found"
         }), 404
-
-    except StudentHasRegistrationsError:
-        return jsonify({
-            "error": (
-                "Student cannot be deleted because "
-                "they have registrations"
-            )
-        }), 409
 
     return jsonify({
         "message": "Student deleted successfully"

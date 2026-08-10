@@ -31,6 +31,12 @@ class Student(db.Model):
         nullable=False
     )
 
+    is_deleted = db.Column(
+        db.Boolean,
+        nullable=False,
+        default=False
+    )
+
     major = db.relationship(
         "Major",
         backref="students"

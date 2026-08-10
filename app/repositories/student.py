@@ -7,15 +7,19 @@ class StudentRepository:
     @staticmethod
     def get_all():
         return db.session.execute(
-            db.select(Student).order_by(Student.id)
+            db.select(Student)
+            .where(Student.is_deleted.is_(False))
+            .order_by(Student.id)
         ).scalars().all()
 
     @staticmethod
     def get_by_id(student_id):
-        return db.session.get(
-            Student,
-            student_id
-        )
+        return db.session.execute(
+            db.select(Student).where(
+                Student.id == student_id,
+                Student.is_deleted.is_(False)
+            )
+        ).scalar_one_or_none()
 
     @staticmethod
     def add(student):
@@ -23,4 +27,4 @@ class StudentRepository:
 
     @staticmethod
     def delete(student):
-        db.session.delete(student)
+        student.is_deleted = True
