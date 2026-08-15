@@ -1,2 +1,2 @@
-from .student import StudentRepository
-from .major import MajorRepository
+from app.repositories.student import StudentRepository
+from app.repositories.major import MajorRepository

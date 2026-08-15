@@ -1,5 +1,4 @@
-from ..extensions import db
-
+from app.extensions import db
 
 class Section(db.Model):
     __tablename__ = "section"

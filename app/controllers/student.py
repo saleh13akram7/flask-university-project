@@ -1,12 +1,12 @@
 from flask import Blueprint, jsonify, request
 from pydantic import ValidationError
 
-from ..dtos import (
+from app.dtos import (
     CreateStudentDTO,
     UpdateStudentDTO,
     StudentResponseDTO
 )
-from ..services import (
+from app.services import (
     StudentService,
     StudentNotFoundError,
     MajorNotFoundError,

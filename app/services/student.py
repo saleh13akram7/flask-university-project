@@ -1,7 +1,7 @@
-from ..extensions import db
-from ..models import Student
-from ..repositories.major import MajorRepository
-from ..repositories.student import StudentRepository
+from app.extensions import db
+from app.models import Student
+from app.repositories.major import MajorRepository
+from app.repositories.student import StudentRepository
 
 
 class StudentNotFoundError(Exception):

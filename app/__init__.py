@@ -1,7 +1,7 @@
 from flask import Flask
 from config import Config
 
-from .extensions import db
+from app.extensions import db
 
 
 def create_app():
@@ -11,12 +11,12 @@ def create_app():
 
     db.init_app(app)
 
-    from . import models
+    from app import models
 
     with app.app_context():
         db.create_all()
 
-    from .controllers import main_controller, student_controller
+    from app.controllers import main_controller, student_controller
 
     app.register_blueprint(main_controller)
     app.register_blueprint(student_controller)
