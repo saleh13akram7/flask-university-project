@@ -16,9 +16,10 @@ def create_app():
     with app.app_context():
         db.create_all()
 
-    from app.controllers import main_controller, student_controller
+    from app.controllers import main_controller, student_controller, course_controller
 
     app.register_blueprint(main_controller)
     app.register_blueprint(student_controller)
+    app.register_blueprint(course_controller)
     
     return app

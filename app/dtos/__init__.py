@@ -3,3 +3,9 @@ from app.dtos.student import (
     UpdateStudentDTO,
     StudentResponseDTO
 )
+
+from app.dtos.course import (
+    CreateCourseDTO,
+    UpdateCourseDTO,
+    CourseResponseDTO
+)

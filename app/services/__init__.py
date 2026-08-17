@@ -3,4 +3,13 @@ from app.services.student import (
     StudentNotFoundError,
     MajorNotFoundError,
     NoFieldsToUpdateError
-    )
+)
+
+from app.services.course import (
+    CourseService,
+    CourseNotFoundError,
+    PrerequisiteCourseNotFoundError,
+    CourseCannotBeOwnPrerequisiteError,
+    CourseNoFieldsToUpdateError,
+    CourseHasDependenciesError
+)
