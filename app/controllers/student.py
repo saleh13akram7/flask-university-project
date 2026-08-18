@@ -6,8 +6,9 @@ from app.dtos import (
     UpdateStudentDTO,
     StudentResponseDTO
 )
-from app.services import (
-    StudentService,
+from app.services import StudentService
+
+from app.exceptions.student import (
     StudentNotFoundError,
     MajorNotFoundError,
     NoFieldsToUpdateError

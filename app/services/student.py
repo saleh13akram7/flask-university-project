@@ -3,18 +3,11 @@ from app.models import Student
 from app.repositories.major import MajorRepository
 from app.repositories.student import StudentRepository
 
-
-class StudentNotFoundError(Exception):
-    pass
-
-
-class MajorNotFoundError(Exception):
-    pass
-
-
-class NoFieldsToUpdateError(Exception):
-    pass
-
+from app.exceptions.student import (
+    StudentNotFoundError,
+    MajorNotFoundError,
+    NoFieldsToUpdateError
+)
 
 
 class StudentService:
@@ -30,7 +23,7 @@ class StudentService:
         )
 
         if student is None:
-            raise StudentNotFoundError()
+            raise StudentNotFoundError(student_id)
 
         return student
 
@@ -41,7 +34,7 @@ class StudentService:
         )
 
         if major is None:
-            raise MajorNotFoundError()
+            raise MajorNotFoundError(student_dto.major_id)
 
         student = Student(
             **student_dto.model_dump()
@@ -72,7 +65,7 @@ class StudentService:
         )
 
         if not updates:
-            raise NoFieldsToUpdateError()
+            raise NoFieldsToUpdateError(student_id)
 
         if "major_id" in updates:
             major = MajorRepository.get_by_id(
@@ -80,7 +73,7 @@ class StudentService:
             )
 
             if major is None:
-                raise MajorNotFoundError()
+                raise MajorNotFoundError(updates["major_id"])
 
         try:
             for field, value in updates.items():

@@ -4,26 +4,13 @@ from app.extensions import db
 from app.models import Course
 from app.repositories.course import CourseRepository
 
-
-class CourseNotFoundError(Exception):
-    pass
-
-
-class PrerequisiteCourseNotFoundError(Exception):
-    pass
-
-
-class CourseCannotBeOwnPrerequisiteError(Exception):
-    pass
-
-
-class CourseNoFieldsToUpdateError(Exception):
-    pass
-
-
-class CourseHasDependenciesError(Exception):
-    pass
-
+from app.exceptions.course import (
+    CourseNotFoundError,
+    PrerequisiteCourseNotFoundError,
+    CourseCannotBeOwnPrerequisiteError,
+    CourseNoFieldsToUpdateError,
+    CourseHasDependenciesError
+)
 
 class CourseService:
 
@@ -38,7 +25,7 @@ class CourseService:
         )
 
         if course is None:
-            raise CourseNotFoundError()
+            raise CourseNotFoundError(course_id)
 
         return course
 
@@ -50,7 +37,7 @@ class CourseService:
             )
 
             if prerequisite is None:
-                raise PrerequisiteCourseNotFoundError()
+                raise PrerequisiteCourseNotFoundError(course_dto.pre_course_id)
 
         course = Course(
             **course_dto.model_dump()
@@ -80,21 +67,21 @@ class CourseService:
         )
 
         if not updates:
-            raise CourseNoFieldsToUpdateError()
+            raise CourseNoFieldsToUpdateError(course_id)
 
         if "pre_course_id" in updates:
             pre_course_id = updates["pre_course_id"]
 
             if pre_course_id is not None:
                 if pre_course_id == course_id:
-                    raise CourseCannotBeOwnPrerequisiteError()
+                    raise CourseCannotBeOwnPrerequisiteError(course_id,pre_course_id)
 
                 prerequisite = CourseRepository.get_by_id(
                     pre_course_id
                 )
 
                 if prerequisite is None:
-                    raise PrerequisiteCourseNotFoundError()
+                    raise PrerequisiteCourseNotFoundError(pre_course_id)
 
         try:
             for field, value in updates.items():
@@ -121,7 +108,7 @@ class CourseService:
         except IntegrityError as error:
             db.session.rollback()
 
-            raise CourseHasDependenciesError() from error
+            raise CourseHasDependenciesError(course_id,["related records"]) from error
 
         except Exception:
             db.session.rollback()

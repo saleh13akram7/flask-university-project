@@ -6,8 +6,9 @@ from app.dtos import (
     UpdateCourseDTO,
     CourseResponseDTO
 )
-from app.services import (
-    CourseService,
+from app.services import CourseService
+
+from app.exceptions.course import (
     CourseNotFoundError,
     PrerequisiteCourseNotFoundError,
     CourseCannotBeOwnPrerequisiteError,
