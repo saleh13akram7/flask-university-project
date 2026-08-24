@@ -3,8 +3,7 @@ from pydantic import ValidationError
 
 from app.dtos import (
     CreateStudentDTO,
-    UpdateStudentDTO,
-    StudentResponseDTO
+    UpdateStudentDTO
 )
 from app.services import StudentService
 
@@ -38,9 +37,7 @@ def get_students():
     students = StudentService.get_all_students()
 
     students_response = [
-        StudentResponseDTO
-        .model_validate(student)
-        .model_dump()
+        student.model_dump()
         for student in students
     ]
 
@@ -51,7 +48,7 @@ def get_students():
 @student_controller.get("/<int:student_id>")
 def get_student(student_id):
     try:
-        student = StudentService.get_student(
+        student_response_dto = StudentService.get_student(
             student_id
         )
 
@@ -60,12 +57,8 @@ def get_student(student_id):
             "error": "Student not found"
         }), 404
 
-    response_dto = StudentResponseDTO.model_validate(
-        student
-    )
-
     return jsonify(
-        response_dto.model_dump()
+        student_response_dto.model_dump()
     ), 200
 
 
@@ -83,7 +76,7 @@ def create_student():
         return validation_error_response(error)
 
     try:
-        student = StudentService.create_student(
+        student_response_dto = StudentService.create_student(
             student_dto
         )
 
@@ -92,13 +85,9 @@ def create_student():
             "error": "Major not found"
         }), 404
 
-    response_dto = StudentResponseDTO.model_validate(
-        student
-    )
-
     return jsonify({
         "message": "Student created successfully",
-        "student": response_dto.model_dump()
+        "student": student_response_dto.model_dump()
     }), 201
 
 
@@ -116,7 +105,7 @@ def update_student(student_id):
         return validation_error_response(error)
 
     try:
-        student = StudentService.update_student(
+        student_response_dto = StudentService.update_student(
             student_id,
             update_dto
         )
@@ -136,13 +125,9 @@ def update_student(student_id):
             "error": "No valid fields provided"
         }), 400
 
-    response_dto = StudentResponseDTO.model_validate(
-        student
-    )
-
     return jsonify({
         "message": "Student updated successfully",
-        "student": response_dto.model_dump()
+        "student": student_response_dto.model_dump()
     }), 200
 
 

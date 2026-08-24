@@ -12,25 +12,54 @@ from app.exceptions.course import (
     CourseHasDependenciesError
 )
 
+from app.dtos import (
+    CreateCourseDTO,
+    UpdateCourseDTO,
+    CourseResponseDTO
+)
+
 class CourseService:
 
     @staticmethod
-    def get_all_courses():
-        return CourseRepository.get_all()
-
-    @staticmethod
-    def get_course(course_id):
+    def _get_course_model(
+        course_id: int
+    ) -> Course:
         course = CourseRepository.get_by_id(
             course_id
         )
 
         if course is None:
-            raise CourseNotFoundError(course_id)
+            raise CourseNotFoundError(
+                course_id
+            )
 
-        return course
+        return course    
 
     @staticmethod
-    def create_course(course_dto):
+    def get_all_courses() -> list[CourseResponseDTO]:
+        courses = CourseRepository.get_all()
+
+        return [
+            CourseResponseDTO.model_validate(course)
+            for course in courses
+        ]
+
+    @staticmethod
+    def get_course(
+        course_id: int
+    ) -> CourseResponseDTO:
+        course = CourseService._get_course_model(
+            course_id
+        )
+
+        return CourseResponseDTO.model_validate(
+            course
+        )
+
+    @staticmethod
+    def create_course(
+        course_dto: CreateCourseDTO
+    ) -> CourseResponseDTO:
         if course_dto.pre_course_id is not None:
             prerequisite = CourseRepository.get_by_id(
                 course_dto.pre_course_id
@@ -51,14 +80,12 @@ class CourseService:
             db.session.rollback()
             raise
 
-        return course
+        return CourseResponseDTO.model_validate(course)
 
     @staticmethod
-    def update_course(
-        course_id,
-        update_dto
-    ):
-        course = CourseService.get_course(
+    def update_course(course_id: int,update_dto: UpdateCourseDTO) -> CourseResponseDTO:
+        
+        course = CourseService._get_course_model(
             course_id
         )
 
@@ -93,11 +120,11 @@ class CourseService:
             db.session.rollback()
             raise
 
-        return course
+        return CourseResponseDTO.model_validate(course)
 
     @staticmethod
-    def delete_course(course_id):
-        course = CourseService.get_course(
+    def delete_course(course_id: int) -> None:
+        course = CourseService._get_course_model(
             course_id
         )
 

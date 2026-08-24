@@ -3,8 +3,7 @@ from pydantic import ValidationError
 
 from app.dtos import (
     CreateCourseDTO,
-    UpdateCourseDTO,
-    CourseResponseDTO
+    UpdateCourseDTO
 )
 from app.services import CourseService
 
@@ -40,9 +39,7 @@ def get_courses():
     courses = CourseService.get_all_courses()
 
     courses_response = [
-        CourseResponseDTO
-        .model_validate(course)
-        .model_dump()
+        course.model_dump()
         for course in courses
     ]
 
@@ -53,7 +50,7 @@ def get_courses():
 @course_controller.get("/<int:course_id>")
 def get_course(course_id):
     try:
-        course = CourseService.get_course(
+        course_response_dto = CourseService.get_course(
             course_id
         )
 
@@ -62,12 +59,8 @@ def get_course(course_id):
             "error": "Course not found"
         }), 404
 
-    response_dto = CourseResponseDTO.model_validate(
-        course
-    )
-
     return jsonify(
-        response_dto.model_dump()
+        course_response_dto.model_dump()
     ), 200
 
 
@@ -85,7 +78,7 @@ def create_course():
         return validation_error_response(error)
 
     try:
-        course = CourseService.create_course(
+        course_response_dto = CourseService.create_course(
             course_dto
         )
 
@@ -94,13 +87,9 @@ def create_course():
             "error": "Prerequisite course not found"
         }), 404
 
-    response_dto = CourseResponseDTO.model_validate(
-        course
-    )
-
     return jsonify({
         "message": "Course created successfully",
-        "course": response_dto.model_dump()
+        "course": course_response_dto.model_dump()
     }), 201
 
 
@@ -118,7 +107,7 @@ def update_course(course_id):
         return validation_error_response(error)
 
     try:
-        course = CourseService.update_course(
+        course_response_dto = CourseService.update_course(
             course_id,
             update_dto
         )
@@ -145,13 +134,9 @@ def update_course(course_id):
             "error": "No valid fields provided"
         }), 400
 
-    response_dto = CourseResponseDTO.model_validate(
-        course
-    )
-
     return jsonify({
         "message": "Course updated successfully",
-        "course": response_dto.model_dump()
+        "course": course_response_dto.model_dump()
     }), 200
 
 
