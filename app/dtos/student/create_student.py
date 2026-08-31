@@ -24,6 +24,6 @@ class CreateStudentDTO(BaseModel):
 
     email_address: EmailStr
 
-    major_id: int = Field(
-        gt=0
-    )
+    major_id: int  = Field(
+            gt=0
+        )

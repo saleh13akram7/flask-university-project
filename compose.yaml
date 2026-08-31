@@ -1,0 +1,41 @@
+services:
+
+  db:
+    image: mysql:8.0
+    container_name: university-mysql
+
+    command: --default-authentication-plugin=mysql_native_password
+
+    environment:
+      MYSQL_ROOT_PASSWORD: dockerroot
+      MYSQL_DATABASE: university_db
+      MYSQL_USER: university_user
+      MYSQL_PASSWORD: dockerpass
+
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-pdockerroot"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+
+  web:
+    build: .
+    container_name: university-flask
+
+    environment:
+      DATABASE_URL: mysql+pymysql://university_user:dockerpass@db:3306/university_db
+
+    ports:
+      - "5000:5000"
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+
+volumes:
+  mysql_data:
